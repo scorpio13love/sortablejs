@@ -6,7 +6,6 @@
     "test": "ts-node scripts/test.ts",
     "build:umd": "cd packages/sortablejs && npm run build:umd"
   },
-  "main": "packages/sortablejs/src/umd.js",
   "devDependencies": {
     "lerna": "^3.22.1",
     "@types/node": "^14.10.1",
