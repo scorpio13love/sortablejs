@@ -1,11 +1,12 @@
 {
-  "name": "@sortablejs/monorepo",
+  "name": "@bilibili-studio/sortablejs",
   "private": true,
   "scripts": {
     "test:compat": "ts-node scripts/test-compat.ts",
     "test": "ts-node scripts/test.ts",
     "build:umd": "cd packages/sortablejs && npm run build:umd"
   },
+  "main": "packages/sortablejs/src/umd.js",
   "devDependencies": {
     "lerna": "^3.22.1",
     "@types/node": "^14.10.1",

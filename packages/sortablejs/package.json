@@ -1,8 +1,9 @@
 {
-  "name": "sortablejs",
+  "name": "@bilibili-studio/sortablejs",
   "version": "1.12.0",
   "description": "JavaScript library for reorderable drag-and-drop lists on modern browsers and touch devices",
-  "main": "dist/sortable.umd.js",
+  "main": "src/umd.js",
+  "module": "src/umd.js",
   "scripts": {
     "build": "npm-run-all --parallel build:*",
     "build:umd": "microbundle -f umd -i src/umd.ts -o dist/sortable.umd.js --name Sortable",
@@ -41,5 +42,8 @@
     "microbundle": "^0.12.3",
     "npm-run-all": "^4.1.5",
     "typescript": "^3.9.7"
+  },
+  "dependencies": {
+    "core-js": "^3.7.0"
   }
 }

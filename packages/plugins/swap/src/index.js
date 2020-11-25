@@ -26,6 +26,7 @@ function SwapPlugin() {
         options = this.options;
       if (target && target !== el) {
         let prevSwapEl = lastSwapEl;
+        console.log('@调用onMove', onMove, target)
         if (onMove(target) !== false) {
           toggleClass(target, options.swapClass, true);
           lastSwapEl = target;

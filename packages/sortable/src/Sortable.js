@@ -124,7 +124,9 @@ let dragEl,
   ghostRelativeParent,
   ghostRelativeParentInitialScroll = [], // (left, top)
   _silent = false,
-  savedInputChecked = [];
+  savedInputChecked = [],
+  // NOTE: cph 我加的
+  theTrueIdx = 0;
 
 /** @const */
 const documentExists = typeof document !== "undefined",
@@ -356,9 +358,10 @@ let nearestEmptyInsertDetectEvent = function (evt) {
 };
 
 let _checkOutsideTargetEl = function (evt) {
-  if (dragEl) {
-    dragEl.parentNode[expando]._isOutsideThisEl(evt.target);
-  }
+  // NOTE: cph 加上虚拟滚动会报错
+  // if (dragEl) {
+  //   dragEl.parentNode[expando]._isOutsideThisEl(evt.target);
+  // }
 };
 
 /**
@@ -479,9 +482,10 @@ Sortable.prototype = /** @lends Sortable.prototype */ {
   constructor: Sortable,
 
   _isOutsideThisEl: function (target) {
-    if (!this.el.contains(target) && target !== this.el) {
-      lastTarget = null;
-    }
+    // NOTE: cph 加上虚拟滚动会报错
+    // if (!this.el.contains(target) && target !== this.el) {
+    //   lastTarget = null;
+    // }
   },
 
   _getDirection: function (evt, target) {
@@ -605,6 +609,8 @@ Sortable.prototype = /** @lends Sortable.prototype */ {
     /** Touch */ touch,
     /** HTMLElement */ target
   ) {
+    // 
+    theTrueIdx = 0
     let _this = this,
       el = _this.el,
       options = _this.options,
@@ -637,7 +643,6 @@ Sortable.prototype = /** @lends Sortable.prototype */ {
       this._lastY = (touch || evt).clientY;
 
       dragEl.style["will-change"] = "all";
-
       dragStartFn = function () {
         pluginEvent("delayEnded", _this, { evt });
         //@ts-ignore
@@ -1213,7 +1218,8 @@ Sortable.prototype = /** @lends Sortable.prototype */ {
 
       // no bubbling and not fallback
       if (!options.dragoverBubble && !evt.rootEl && target !== document) {
-        dragEl.parentNode[expando]._isOutsideThisEl(evt.target);
+        // NOTE: cph 虚拟滚动会报错
+        // dragEl.parentNode[expando]._isOutsideThisEl(evt.target);
 
         // Do not detect for empty insert if already inserted
         !insertion && nearestEmptyInsertDetectEvent(evt);
@@ -1325,7 +1331,6 @@ Sortable.prototype = /** @lends Sortable.prototype */ {
           //@ts-ignore
           targetRect = getRect(target);
         }
-
         if (
           onMove(
             rootEl,
@@ -1388,15 +1393,17 @@ Sortable.prototype = /** @lends Sortable.prototype */ {
           // Check if target is beside dragEl in respective direction (ignoring hidden elements)
           //@ts-ignore
           let dragIndex = index(dragEl);
-
-          do {
-            dragIndex -= direction;
-            sibling = parentEl.children[dragIndex];
-          } while (
-            sibling &&
-            //@ts-ignore
-            (css(sibling, "display") === "none" || sibling === ghostEl)
-          );
+          // NOTE: cph 虚拟滚动
+          if(parentEl) {
+            do {
+              dragIndex -= direction;
+              sibling = parentEl.children[dragIndex];
+            } while (
+              sibling &&
+              //@ts-ignore
+              (css(sibling, "display") === "none" || sibling === ghostEl)
+            );
+          }
         }
         // If dragEl is already beside target: Do not insert
         if (direction === 0 || sibling === target) {
@@ -1432,15 +1439,16 @@ Sortable.prototype = /** @lends Sortable.prototype */ {
           setTimeout(_unsilent, 30);
 
           capture();
-
-          if (after && !nextSibling) {
-            el.appendChild(dragEl);
-          } else {
-            target.parentNode.insertBefore(
-              dragEl,
-              after ? nextSibling : target
-            );
-          }
+          
+          // NOTE: cph 这里是move时的插入node元素操作
+          // if (after && !nextSibling) {
+          //   el.appendChild(dragEl);
+          // } else {
+          //   target.parentNode.insertBefore(
+          //     dragEl,
+          //     after ? nextSibling : target
+          //   );
+          // }
 
           // Undo chrome's scroll adjustment (has no effect on other browsers)
           if (scrolledPastTop) {
@@ -1503,7 +1511,7 @@ Sortable.prototype = /** @lends Sortable.prototype */ {
     //@ts-ignore
     newIndex = index(dragEl);
     newDraggableIndex = index(dragEl, options.draggable);
-
+    
     pluginEvent("drop", this, {
       evt,
     });
@@ -1512,9 +1520,9 @@ Sortable.prototype = /** @lends Sortable.prototype */ {
 
     // Get again after plugin event
     //@ts-ignore
-    newIndex = index(dragEl);
+    // newIndex = index(dragEl);
     newDraggableIndex = index(dragEl, options.draggable);
-
+    newIndex = theTrueIdx
     //@ts-ignore
     if (Sortable.eventCanceled) {
       this._nulling();
@@ -1882,6 +1890,7 @@ function _globalDragOver(/**Event*/ evt) {
   evt.cancelable && evt.preventDefault();
 }
 
+// NOTE: cph 这里调用onMove方法
 function onMove(
   fromEl,
   toEl,
@@ -1911,7 +1920,10 @@ function onMove(
   evt.from = fromEl;
   evt.dragged = dragEl;
   evt.draggedRect = dragRect;
-  evt.related = targetEl || toEl;
+  evt.related = targetEl || toEl
+  // TODO: 获取data-id
+  theTrueIdx = +evt.related.dataset.id || 0
+
   //@ts-ignore
   evt.relatedRect = targetRect || getRect(toEl);
   evt.willInsertAfter = willInsertAfter;

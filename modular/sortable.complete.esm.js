@@ -2082,9 +2082,10 @@ Sortable.prototype = /** @lends Sortable.prototype */ {
     }
 
     // Call when dragEl has been inserted
-    function changed() {
-      newIndex = index(dragEl);
-      newDraggableIndex = index(dragEl, options.draggable);
+    function changed(index) {
+      // NOTE: cph 修改批量拖动
+      newIndex = index || index(dragEl);
+      newDraggableIndex = index || index(dragEl, options.draggable);
       _dispatchEvent({
         sortable: _this,
         name: "change",

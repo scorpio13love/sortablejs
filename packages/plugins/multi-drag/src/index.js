@@ -250,15 +250,16 @@ function MultiDragPlugin() {
           //@ts-ignore
           // Fold: Set all multi drag elements's rects to dragEl's rect when multi-drag elements are invisible
           let dragRectAbsolute = getRect(dragEl, false, true, true);
+          
+          // NOTE: cph 不添加
+          // multiDragElements.forEach((multiDragElement) => {
+          //   if (multiDragElement === dragEl) return;
+          //   setRect(multiDragElement, dragRectAbsolute);
 
-          multiDragElements.forEach((multiDragElement) => {
-            if (multiDragElement === dragEl) return;
-            setRect(multiDragElement, dragRectAbsolute);
-
-            // Move element(s) to end of parentEl so that it does not interfere with multi-drag clones insertion if they are inserted
-            // while folding, and so that we can capture them again because old sortable will no longer be fromSortable
-            parentEl.appendChild(multiDragElement);
-          });
+          //   // Move element(s) to end of parentEl so that it does not interfere with multi-drag clones insertion if they are inserted
+          //   // while folding, and so that we can capture them again because old sortable will no longer be fromSortable
+          //   parentEl.appendChild(multiDragElement);
+          // });
 
           folding = true;
         }
@@ -330,10 +331,14 @@ function MultiDragPlugin() {
       oldIndex,
       putSortable,
     }) {
+      // NOTE: cph 虚拟滚动会报错。这样能解决报错
+      parentEl = parentEl || rootEl
+
       let toSortable = putSortable || this.sortable;
 
       if (!evt) return;
 
+      // NOTE: cph 虚拟滚动会报错
       let options = this.options,
         children = parentEl.children;
 
@@ -419,8 +424,11 @@ function MultiDragPlugin() {
       // Multi-drag drop
       if (dragStarted && this.isMultiDrag) {
         // Do not "unfold" after around dragEl if reverted
+        // TODO: 修复批量拖拽问题parentEl[expando]到底是什么东西
+        // console.log('@parentEl', parentEl, parentEl[expando])
+        // parentEl[expando].options.sort ||
         if (
-          (parentEl[expando].options.sort || parentEl !== rootEl) &&
+          (parentEl !== rootEl) &&
           multiDragElements.length > 1
         ) {
           //@ts-ignore
@@ -457,18 +465,19 @@ function MultiDragPlugin() {
             // Multi drag elements are not necessarily removed from the DOM on drop, so to reinsert
             // properly they must all be removed
             removeMultiDragElements();
-
-            multiDragElements.forEach((multiDragElement) => {
-              if (children[multiDragIndex]) {
-                parentEl.insertBefore(
-                  multiDragElement,
-                  children[multiDragIndex]
-                );
-              } else {
-                parentEl.appendChild(multiDragElement);
-              }
-              multiDragIndex++;
-            });
+            
+            // NOTE: cph 这是multi drag的添加元素方法
+            // multiDragElements.forEach((multiDragElement) => {
+            //   if (children[multiDragIndex]) {
+            //     parentEl.insertBefore(
+            //       multiDragElement,
+            //       children[multiDragIndex]
+            //     );
+            //   } else {
+            //     parentEl.appendChild(multiDragElement);
+            //   }
+            //   multiDragIndex++;
+            // });
 
             // If initial folding is done, the elements may have changed position because they are now
             // unfolding around dragEl, even though dragEl may not have his index changed, so update event
@@ -660,17 +669,17 @@ function MultiDragPlugin() {
 }
 
 function insertMultiDragElements(clonesInserted, rootEl) {
-  multiDragElements.forEach((multiDragElement, i) => {
-    let target =
-      rootEl.children[
-        multiDragElement.sortableIndex + (clonesInserted ? Number(i) : 0)
-      ];
-    if (target) {
-      rootEl.insertBefore(multiDragElement, target);
-    } else {
-      rootEl.appendChild(multiDragElement);
-    }
-  });
+  // multiDragElements.forEach((multiDragElement, i) => {
+  //   let target =
+  //     rootEl.children[
+  //       multiDragElement.sortableIndex + (clonesInserted ? Number(i) : 0)
+  //     ];
+  //   if (target) {
+  //     rootEl.insertBefore(multiDragElement, target);
+  //   } else {
+  //     rootEl.appendChild(multiDragElement);
+  //   }
+  // });
 }
 
 /**
