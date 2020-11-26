@@ -425,7 +425,6 @@ function MultiDragPlugin() {
       if (dragStarted && this.isMultiDrag) {
         // Do not "unfold" after around dragEl if reverted
         // TODO: 修复批量拖拽问题parentEl[expando]到底是什么东西
-        // console.log('@parentEl', parentEl, parentEl[expando])
         // parentEl[expando].options.sort ||
         if (
           (parentEl !== rootEl) &&

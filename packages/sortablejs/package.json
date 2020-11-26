@@ -1,6 +1,6 @@
 {
   "name": "@bilibili-studio/sortablejs",
-  "version": "1.14.0",
+  "version": "1.15.0",
   "description": "JavaScript library for reorderable drag-and-drop lists on modern browsers and touch devices",
   "main": "dist/sortable.umd.js",
   "scripts": {

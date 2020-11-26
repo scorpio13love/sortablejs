@@ -126,7 +126,7 @@ let dragEl,
   _silent = false,
   savedInputChecked = [],
   // NOTE: cph 我加的
-  theTrueIdx = 0;
+  theTrueIdx = -1;
 
 /** @const */
 const documentExists = typeof document !== "undefined",
@@ -610,7 +610,7 @@ Sortable.prototype = /** @lends Sortable.prototype */ {
     /** HTMLElement */ target
   ) {
     // 
-    theTrueIdx = 0
+    theTrueIdx = -1
     let _this = this,
       el = _this.el,
       options = _this.options,
@@ -1441,14 +1441,14 @@ Sortable.prototype = /** @lends Sortable.prototype */ {
           capture();
           
           // NOTE: cph 这里是move时的插入node元素操作
-          // if (after && !nextSibling) {
-          //   el.appendChild(dragEl);
-          // } else {
-          //   target.parentNode.insertBefore(
-          //     dragEl,
-          //     after ? nextSibling : target
-          //   );
-          // }
+          if (after && !nextSibling) {
+            el.appendChild(dragEl);
+          } else {
+            target.parentNode.insertBefore(
+              dragEl,
+              after ? nextSibling : target
+            );
+          }
 
           // Undo chrome's scroll adjustment (has no effect on other browsers)
           if (scrolledPastTop) {
@@ -1664,11 +1664,11 @@ Sortable.prototype = /** @lends Sortable.prototype */ {
         //@ts-ignore
         if (Sortable.active) {
           /* jshint eqnull:true */
-          if (newIndex == null || newIndex === -1) {
-            newIndex = oldIndex;
-            newDraggableIndex = oldDraggableIndex;
-          }
-
+          // NOTE: cph 需要-1
+          // if (newIndex == null || newIndex === -1) {
+          //   newIndex = oldIndex;
+          //   newDraggableIndex = oldDraggableIndex;
+          // }
           _dispatchEvent({
             sortable: this,
             name: "end",
@@ -1921,9 +1921,34 @@ function onMove(
   evt.dragged = dragEl;
   evt.draggedRect = dragRect;
   evt.related = targetEl || toEl
-  // TODO: 获取data-id
-  theTrueIdx = +evt.related.dataset.id || 0
-
+  theTrueIdx = -1
+  // 划过去相邻的元素id
+  const relativeId = +evt.related.dataset.id || 0
+  // 当前el的元素id
+  const dragElId = +dragEl.dataset.id || 0
+  const tableRowDataEl = rootEl.getElementsByClassName('table-row-data')
+  let indexInDomArr = 0
+  // 
+  setTimeout(() => {
+    // 移除所有元素的relative
+    for(let i = 0; i< tableRowDataEl.length; i+=1) {
+      const el = tableRowDataEl[i]
+      el.classList.remove('relative-dom-after')
+      el.classList.remove('relative-dom-before')
+      // 知道它当前在数组哪个位置
+      if(+el.dataset.id === dragElId) {
+        indexInDomArr = i
+      }
+    }
+    const beforeItem = tableRowDataEl[indexInDomArr - 1]
+    if(beforeItem) {
+      theTrueIdx = beforeItem.dataset.id
+      tableRowDataEl[indexInDomArr] && tableRowDataEl[indexInDomArr].classList.add('relative-dom-after')
+    } else {
+      theTrueIdx = 0
+      tableRowDataEl[0] && tableRowDataEl[0].classList.add('relative-dom-before')
+    }
+  }, 0)
   //@ts-ignore
   evt.relatedRect = targetRect || getRect(toEl);
   evt.willInsertAfter = willInsertAfter;
